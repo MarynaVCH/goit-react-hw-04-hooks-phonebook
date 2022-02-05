@@ -77,23 +77,20 @@ export default class App extends React.Component {
 
     return (
       <Title title="Phonebook">
-        <ContactForm onSubmit={this.addContact}></ContactForm>
+        <ContactForm onSubmit={this.addContact} />
 
-        {contacts.length > 0 && (
-          <Title title="Contacts">
-            {contacts.length > 2 && (
-              <Filter
-                id={this.filterInputId}
-                value={value}
-                onChangeFilter={this.handleChangeFilter}
-              />
-            )}
-            <ContactList
-              onDeleteContact={this.deleteContact}
-              contacts={filteredContacts}
-            ></ContactList>
-          </Title>
-        )}
+        <Title title="Contacts">
+          <Filter
+            id={this.filterInputId}
+            value={value}
+            onChangeFilter={this.handleChangeFilter}
+          />
+
+          <ContactList
+            onDeleteContact={this.deleteContact}
+            contacts={filteredContacts}
+          />
+        </Title>
       </Title>
     );
   }
