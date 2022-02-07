@@ -1,97 +1,80 @@
-import React from 'react';
+import { useState, useEffect } from 'react';
+import { nanoid } from 'nanoid';
 import ContactForm from './Components/ContactForm/ContactForm';
 import Title from './Components/Title/Title';
-import { nanoid } from 'nanoid';
 import ContactList from './Components/ContactList/ContactList';
 import Filter from './Components/Filter/Filter';
 
-export default class App extends React.Component {
-  state = {
-    contacts: [
-      { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-      { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-      { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-      { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-    ],
-    filter: '',
-  };
+export default function App() {
+  const defaultContacts = [
+    { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
+    { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
+    { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
+    { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
+  ];
 
-  componentDidMount() {
-    const contacts = localStorage.getItem('contacts');
-    const parsedContacts = JSON.parse(contacts);
+  const registeredContact = window.localStorage.getItem('contacts');
 
-    if (parsedContacts) {
-      this.setState({ contacts: parsedContacts });
-    }
-  }
+  const [contacts, setContacts] = useState(
+    () => JSON.parse(registeredContact) ?? defaultContacts,
+  );
 
-  componentDidUpdate(prevState) {
-    if (this.state.contacts !== prevState.contacts) {
-      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
-    }
-  }
+  const [filter, setFilter] = useState('');
 
-  addContact = (name, number) => {
+  useEffect(() => {
+    window.localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
+
+  const addContact = (name, number) => {
     const contact = {
       id: nanoid(),
       name,
       number,
     };
 
-    const findContact = this.state.contacts.find(
-      contact => contact.name === name,
-    );
+    const findContact = contacts.find(contact => contact.name === name);
 
     if (findContact) {
       alert(`${findContact.name} is already in contacts`);
       return;
     }
 
-    this.setState(prevState => ({
-      contacts: [...prevState.contacts, contact],
-    }));
+    setContacts(prevState => [...prevState, contact]);
   };
 
-  handleChangeFilter = filter => {
-    this.setState({ filter });
+  const handleChangeFilter = e => {
+    const { value } = e.target;
+    setFilter(value);
   };
 
-  filterInputId = nanoid();
+  const filterInputId = nanoid();
 
-  deleteContact = contactId => {
-    this.setState(prev => ({
-      contacts: prev.contacts.filter(contact => contactId !== contact.id),
-    }));
+  const deleteContact = contactId => {
+    setContacts(prev => prev.filter(contact => contactId !== contact.id));
   };
 
-  filterByName = () => {
-    const { contacts, filter } = this.state;
+  const filterByName = () => {
     return contacts.filter(contact =>
       contact.name.toLowerCase().includes(filter.toLowerCase()),
     );
   };
 
-  render() {
-    const { contacts, value } = this.state;
-    const filteredContacts = this.filterByName();
+  return (
+    <Title title="Phonebook">
+      <ContactForm onSubmit={addContact} />
 
-    return (
-      <Title title="Phonebook">
-        <ContactForm onSubmit={this.addContact} />
+      <Title title="Contacts">
+        <Filter
+          id={filterInputId}
+          value={filter}
+          onChangeFilter={handleChangeFilter}
+        />
 
-        <Title title="Contacts">
-          <Filter
-            id={this.filterInputId}
-            value={value}
-            onChangeFilter={this.handleChangeFilter}
-          />
-
-          <ContactList
-            onDeleteContact={this.deleteContact}
-            contacts={filteredContacts}
-          />
-        </Title>
+        <ContactList
+          onDeleteContact={deleteContact}
+          contacts={filterByName()}
+        />
       </Title>
-    );
-  }
+    </Title>
+  );
 }

@@ -4,12 +4,7 @@ export default function Filter({ value, id, onChangeFilter }) {
   return (
     <>
       <label htmlFor={id}>Find contacts by name</label>
-      <input
-        type="text"
-        value={value}
-        id={id}
-        onChange={e => onChangeFilter(e.target.value)}
-      />
+      <input type="text" value={value} id={id} onChange={onChangeFilter} />
     </>
   );
 }
